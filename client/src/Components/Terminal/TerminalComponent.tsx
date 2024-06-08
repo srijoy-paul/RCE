@@ -23,6 +23,7 @@ function TerminalComponent() {
 
     return () => {
       term.dispose();
+      socket.off("terminal:response");
     };
   }, []);
   return (

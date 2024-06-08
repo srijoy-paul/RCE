@@ -12,6 +12,7 @@
   "dependencies": {
     "@xterm/xterm": "^5.5.0",
     "react": "^18.2.0",
+    "react-ace": "^11.0.1",
     "react-dom": "^18.2.0",
     "socket.io-client": "^4.7.5"
   },
