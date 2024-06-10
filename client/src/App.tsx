@@ -12,9 +12,9 @@ import "ace-builds/src-noconflict/ext-language_tools";
 function App() {
   const [fileTree, setFileTree] = useState({});
   const [selectedFile, setSelectedFile] = useState();
-  const [selectedFileContent, setSelectedFileContent] = useState();
+  // const [selectedFileContent, setSelectedFileContent] = useState();
   const [code, setCode] = useState("");
-  const [isSaved, setIsSaved] = useState(selectedFileContent === code);
+  // const isSaved = code === selectedFileContent;
 
   const getFileTree = async () => {
     const response = await fetch("http://localhost:3030/files");
@@ -35,6 +35,10 @@ function App() {
     };
   }, []);
 
+  useEffect(() => {
+    setCode("");
+  }, [selectedFile]);
+
   //getfilecontent useEffect
   useEffect(() => {
     (async () => {
@@ -44,19 +48,19 @@ function App() {
       );
       const parsedResponse = await response.json();
       console.log(parsedResponse);
-      setSelectedFileContent(parsedResponse.fileContent);
+      setCode(parsedResponse.fileContent);
     })();
   }, [selectedFile]);
 
-  useEffect(() => {
-    if (selectedFile && selectedFileContent) {
-      setCode(selectedFileContent);
-    }
-  }, [selectedFileContent]);
+  // useEffect(() => {
+  //   if (selectedFile && selectedFileContent) {
+  //     setCode(selectedFileContent);
+  //   }
+  // }, [selectedFile, selectedFileContent]);
 
   //debounce untill user writes within 5 seconds
   useEffect(() => {
-    if (code && !isSaved) {
+    if (code) {
       const timer = setTimeout(() => {
         socket.emit("file:save", {
           path: selectedFile,
@@ -71,13 +75,13 @@ function App() {
     }
   }, [code]);
 
-  useEffect(() => {
-    if (code === selectedFileContent) {
-      setIsSaved(true);
-    } else {
-      setIsSaved(false);
-    }
-  }, [code]);
+  // useEffect(() => {
+  //   if (code === selectedFileContent) {
+  //     setIsSaved(true);
+  //   } else {
+  //     setIsSaved(false);
+  //   }
+  // }, [code]);
 
   const onChangeHandler = (e) => {
     //save code on to the server storage
@@ -87,26 +91,33 @@ function App() {
   return (
     <>
       <div className="flex flex-col w-full h-screen ">
-        <div className="flex" style={{ flex: "4" }}>
-          <div style={{ flex: "1" }}>
+        <div className="flex h-[70%]" style={{ flex: "4" }}>
+          <div className="h-[100%]" style={{ flex: "1" }}>
             <FileTreeComponent
               onSelect={(path) => setSelectedFile(path)}
               tree={fileTree}
             />
           </div>
-          <div className="" style={{ flex: "5" }}>
-            {selectedFile && selectedFile}
+          <div className="flex flex-col h-full " style={{ flex: "5" }}>
+            <span className="text-xs h-[5%] flex items-center">
+              {selectedFile && selectedFile}
+            </span>
             <AceEditor
               mode="javascript"
               theme="github"
               value={code}
               onChange={(e) => onChangeHandler(e)}
               name="editor"
-              style={{ width: "100%" }}
+              style={{
+                width: "100%",
+                height: "95%",
+                // border: "1px solid green",
+                overflowY: "scroll",
+              }}
             />
           </div>
         </div>
-        <div className="" style={{ flex: "1" }} id="xterm-container">
+        <div className="h-[30%]" style={{ flex: "1" }} id="xterm-container">
           <TerminalComponent />
         </div>
       </div>

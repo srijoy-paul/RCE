@@ -34,7 +34,7 @@ const FileTreeNode = ({ fileName, nodes, onSelect, path }: Props) => {
 
 function FileTreeComponent({ tree, onSelect }) {
   return (
-    <div>
+    <div className="h-[100%] overflow-y-scroll">
       <FileTreeNode onSelect={onSelect} fileName="/" nodes={tree} path="" />
     </div>
   );

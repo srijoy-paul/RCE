@@ -42,6 +42,7 @@ ptyProcess.onData((data: any) => {
 
 io.on("connection", (socket: any) => {
   console.log(`Socket connected ${socket.id}`);
+  console.log(socket.handshake.query.roomId as string);
 
   socket.on("terminal:write", (data: any) => {
     ptyProcess.write(data);
