@@ -1,3 +1,4 @@
+const { fetchS3Folder, saveToS3 } = require("./config/aws");
 const os = require("os");
 const express = require("express");
 const { createServer } = require("http");
@@ -9,12 +10,16 @@ const path = require("path");
 const chokidar = require("chokidar");
 require("dotenv").config();
 
+const projectRoutes = require("./Routes/ProjectRoutes");
+
 const app = express();
 app.use(cors());
+app.use(express.json());
 const server = createServer(app);
 const io = new SocketServer(server, {
   cors: {
     origin: "*",
+    methods: ["GET", "POST"],
   },
 });
 
@@ -30,8 +35,6 @@ const ptyProcess = pty.spawn(shell, [], {
   env: process.env,
 });
 
-//  console.log(ptyProcess);
-
 chokidar.watch("./user").on("all", (event: any, path: any) => {
   io.emit("file:refresh", path);
 });
@@ -41,26 +44,43 @@ ptyProcess.onData((data: any) => {
 });
 
 io.on("connection", (socket: any) => {
-  console.log(`Socket connected ${socket.id}`);
-  console.log(socket.handshake.query.roomId as string);
+  // console.log(`Socket connected ${socket.id}`);
+  const replId = socket.handshake.query.roomId as string;
+  console.log("Socket id", replId);
+
+  if (replId) {
+    socket.join(replId);
+    console.log(`repl created`);
+  }
+
+  if (!replId) {
+    socket.disconnect();
+    return;
+  }
 
   socket.on("terminal:write", (data: any) => {
     ptyProcess.write(data);
   });
 
-  socket.on("file:save", ({ path, code }: any) => {
-    // console.log(path, code);
+  socket.on("file:save", async ({ filePath, code }: any) => {
+    // console.log(filePath, code);
+    const fullPath = path.join(__dirname, `user/${filePath}`);
 
-    fs.writeFile(`./user${path}`, code);
+    fs.writeFile(fullPath, code);
+    await saveToS3(`code`, filePath, code);
   });
-  // socket.on("file:fetch", async (path: any) => {
-  //   console.log("received path to fetch", path);
-  //   const fileContent = await fs.readFile(`./user${path}`, "utf8");
-  //   console.log(fileContent);
-  // });
+
+  socket.on("disconnect", () => {
+    console.log("User disconnected");
+  });
 });
 
 app.get("/files", async (req: any, res: any) => {
+  const { replId } = req.query;
+  // console.log(path.join(__dirname, `/user/${replId}`));
+
+  await fetchS3Folder(`code/${replId}`, path.join(__dirname, `user/${replId}`));
+
   const fileTree = await generateFileTree("./user");
   res.json(fileTree);
 });
@@ -71,6 +91,8 @@ app.get("/files/content", async (req: any, res: any) => {
   console.log("fetchd content", fileContent);
   res.status(201).json({ fileContent: fileContent });
 });
+
+app.use("/api/v1/project", projectRoutes);
 
 const PORT = 3030;
 server.listen(PORT, () => {

@@ -1,9 +1,10 @@
 import { Terminal } from "@xterm/xterm";
 import "@xterm/xterm/css/xterm.css";
 import { useEffect } from "react";
-import socket from "../../Sockets";
+import { Socket } from "socket.io-client";
 
-function TerminalComponent() {
+type Props = { socket: Socket | null };
+function TerminalComponent({ socket }: Props) {
   useEffect(() => {
     const terminalElement = document.getElementById("terminal");
     const term = new Terminal({
@@ -15,15 +16,15 @@ function TerminalComponent() {
     term.write("Srijoy-pc bash$");
 
     term.onData((data) => {
-      socket.emit("terminal:write", data);
+      socket?.emit("terminal:write", data);
     });
-    socket.on("terminal:response", (data) => {
+    socket?.on("terminal:response", (data) => {
       term.write(data);
     });
 
     return () => {
       term.dispose();
-      socket.off("terminal:response");
+      socket?.off("terminal:response");
     };
   }, []);
   return (

@@ -1,5 +1,3 @@
-// import socket from "../../Sockets";
-
 type Props = any;
 const FileTreeNode = ({ fileName, nodes, onSelect, path }: Props) => {
   const isDir = !!nodes;
