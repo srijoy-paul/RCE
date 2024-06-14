@@ -2,7 +2,7 @@ import { useState } from "react";
 import { slug_words } from "../../config";
 import { useNavigate } from "react-router-dom";
 
-const SERVICE_URL = import.meta.env.VITE_BACKEND_SERVICE_URL;
+import { BACKEND_SERVICE_URL } from "../../config";
 
 function getRandomSlug() {
   let slug = "";
@@ -47,13 +47,19 @@ function LandingPage() {
             disabled={loading}
             onClick={async () => {
               setLoading(true);
-              await fetch(`${SERVICE_URL}/api/v1/project/create`, {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ replId, language }),
-              });
+              const response = await fetch(
+                `${BACKEND_SERVICE_URL}/api/v1/project/create`,
+                {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({ replId, language }),
+                }
+              );
+              if (!response.ok) {
+                throw new Error("Something went wrong");
+              }
               setLoading(false);
               navigate(`/coding/?replId=${replId}`);
             }}

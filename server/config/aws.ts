@@ -16,6 +16,8 @@ export async function copyS3Folder(
   continuationToken?: string
 ): Promise<void> {
   try {
+    console.log("inside copys3foler method");
+
     const listParams = {
       Bucket: process.env.S3_BUCKET ?? "",
       Prefix: sourcePrefix,
@@ -23,6 +25,7 @@ export async function copyS3Folder(
     };
 
     const allObjects = await s3.listObjectsV2(listParams).promise();
+    console.log("Copys3foler all objects", allObjects);
 
     if (!allObjects.Contents || allObjects.Contents.length === 0) return;
 
@@ -62,7 +65,7 @@ export async function fetchS3Folder(
     console.log("current folder content fetch params", params);
 
     const response = await s3.listObjectsV2(params).promise();
-    // console.log(response);
+    console.log("fetch response", response);
     if (response.Contents) {
       await Promise.all(
         response.Contents.map(async (file: any) => {
@@ -74,18 +77,18 @@ export async function fetchS3Folder(
             };
 
             const data = await s3.getObject(getObjectParams).promise();
-            // console.log("fetched object data", data);
+            console.log("fetched object data", data);
 
             if (data.Body) {
               const fileData = data.Body;
               // console.log(fileData);
 
               const filePath = `${localPath}${fileKey.replace(key, "")}`;
-              // console.log("local filepath", filePath);
-              console.log("before write file");
+              console.log("local filepath from aws.ts", filePath);
+              console.log("-->before write file");
 
               await writeFile(filePath, fileData);
-              console.log("after write file");
+              console.log("-->after write file");
 
               console.log(`Downloaded ${fileKey} to ${filePath}`);
             }

@@ -46,3 +46,6 @@ export const slug_words = [
   "services",
   "devops",
 ];
+
+export const EXECUTION_ENGINE_URI = "ws://localhost:3030";
+export const BACKEND_SERVICE_URL = "http://localhost:3030";

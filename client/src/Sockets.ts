@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Socket, io } from "socket.io-client";
-const EXECUTION_ENGINE_URI = import.meta.env.VITE_EXECUTION_ENGINE_URI;
+import { EXECUTION_ENGINE_URI } from "./config";
+console.log("from sockets.ts", EXECUTION_ENGINE_URI);
 
 // const initialSocket = io("http://localhost:3030");
 function useSocket(replId: string) {
@@ -9,13 +10,29 @@ function useSocket(replId: string) {
   useEffect(() => {
     const newSocket = io(`${EXECUTION_ENGINE_URI}?roomId=${replId}`, {
       transports: ["websocket"],
-      reconnectionAttempts: 3,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      timeout: 20000,
     });
 
-    newSocket.on("disconnect", () => {
-      console.log("Disconnected from WebSocket");
+    newSocket.on("connect", () => {
+      console.log("Connected to WebSocket with ID:", newSocket.id);
     });
-    // console.log(newSocket);
+
+    newSocket.on("disconnect", (reason) => {
+      console.log("Disconnected from WebSocket:", reason);
+      if (reason === "io server disconnect") {
+        newSocket.connect();
+      } else if (reason === "transport close") {
+        console.log("Transport closed. Attempting to reconnect...");
+        newSocket.connect();
+      }
+    });
+
+    newSocket.on("connect_error", (error) => {
+      console.error("Connection error:", error);
+    });
     setSocket(newSocket);
 
     return () => {
