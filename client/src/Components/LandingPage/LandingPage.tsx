@@ -61,7 +61,7 @@ function LandingPage() {
                 throw new Error("Something went wrong");
               }
               setLoading(false);
-              navigate(`/coding/?replId=${replId}`);
+              navigate(`/coding?replId=${replId}`);
             }}
           >
             {loading ? "Starting..." : "Start Coding"}

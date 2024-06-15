@@ -20,8 +20,13 @@ function useSocket(replId: string) {
       console.log("Connected to WebSocket with ID:", newSocket.id);
     });
 
-    newSocket.on("disconnect", (reason) => {
+    newSocket.on("disconnect", (reason, details) => {
       console.log("Disconnected from WebSocket:", reason);
+      console.log("Reason for disconnection low level", details?.message);
+
+      console.log("details.description", details?.description);
+
+      console.log("details.context", details?.context);
       if (reason === "io server disconnect") {
         newSocket.connect();
       } else if (reason === "transport close") {

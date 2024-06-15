@@ -15,7 +15,7 @@ const FileTreeNode = ({ fileName, nodes, onSelect, path }: Props) => {
       {nodes && (
         <ul className="">
           {Object?.keys(nodes)?.map((child: any) => (
-            <li className="cursor-pointer" key={child}>
+            <li className="cursor-pointer " key={child}>
               <FileTreeNode
                 path={path + "/" + child}
                 fileName={child}

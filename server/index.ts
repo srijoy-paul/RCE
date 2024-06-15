@@ -69,7 +69,7 @@ io.on("connection", (socket: any) => {
   });
 
   socket.on("file:save", async ({ filePath, code }: any) => {
-    // console.log(filePath, code);
+    console.log("from file:save socket event", filePath, code);
     const fullPath = path.join(__dirname, `user/${filePath}`);
 
     fs.writeFile(fullPath, code);
@@ -94,13 +94,15 @@ app.get("/files", async (req: any, res: any) => {
 
   await fetchS3Folder(`code/${replId}`, path.join(__dirname, `user/${replId}`));
 
-  const fileTree = await generateFileTree("./user");
+  const fileTree = await generateFileTree(`./user/${replId}`);
   res.json(fileTree);
 });
 
 app.get("/files/content", async (req: any, res: any) => {
   const { path } = req.query;
-  const fileContent = await fs.readFile(`./user${path}`, "utf8");
+  console.log("path from fetch file content route", path);
+
+  const fileContent = await fs.readFile(`./user/${path}`, "utf8");
   console.log("fetchd content", fileContent);
   res.status(201).json({ fileContent: fileContent });
 });

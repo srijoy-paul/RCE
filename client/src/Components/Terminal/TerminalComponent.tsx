@@ -28,7 +28,7 @@ function TerminalComponent({ socket }: Props) {
     };
   }, []);
   return (
-    <div>
+    <div className="w-full">
       <div id="terminal" style={{ width: "100%", height: "100%" }}></div>
     </div>
   );
